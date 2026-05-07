@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D Lingo - Free Real-Time Voice Translator</title>
+  <meta name="description" content="Free real-time voice translator supporting 25+ languages. No signup required.">
+  <meta name="keywords" content="voice translator, language translator, AI translator, free translator, D Lingo">
+  <meta name="author" content="D Lingo">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- OG Tags -->
+  <meta property="og:title" content="D Lingo – Free Real-Time Voice Translator">
+  <meta property="og:description" content="Speak in any language. Be heard in theirs. Free, instant, no signup.">
+  <meta property="og:url" content="https://dlingo-eight.vercel.app/">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #070c0e;
+      --surface: #0d1618;
+      --border: #1a2e32;
+      --accent: #00e5c0;
+      --accent2: #00aeff;
+      --text: #e8f4f6;
+      --muted: #6b8f95;
+      --card: #0f1e21;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 5%;
+      background: rgba(7,12,14,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .logo span { color: var(--text); }
+
+    nav a.cta-nav {
+      background: var(--accent);
+      color: #070c0e;
+      font-weight: 500;
+      padding: 0.5rem 1.3rem;
+      border-radius: 100px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+    nav a.cta-nav:hover { opacity: 0.85; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 7rem 5% 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(0,229,192,0.12) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,229,192,0.1);
+      border: 1px solid rgba(0,229,192,0.25);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .pulse-dot {
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.8s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      font-weight: 300;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #070c0e;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 0.85rem 2.2rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(0,229,192,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 45px rgba(0,229,192,0.4); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 1rem;
+      padding: 0.85rem 2.2rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── LANGUAGES TICKER ── */
+    .ticker-wrap {
+      overflow: hidden;
+      padding: 2rem 0;
+      position: relative;
+      margin: 2rem 0 0;
+      animation: fadeUp 0.7s 0.5s ease both;
+    }
+    .ticker-wrap::before, .ticker-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 120px;
+      z-index: 2;
+    }
+    .ticker-wrap::before { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+    .ticker-wrap::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+
+    .ticker {
+      display: flex;
+      gap: 1.5rem;
+      width: max-content;
+      animation: ticker 28s linear infinite;
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .lang-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .lang-pill .flag { font-size: 1.1rem; }
+
+    /* ── FEATURES ── */
+    section { padding: 6rem 5%; position: relative; }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .section-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      max-width: 600px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 500px;
+      margin-bottom: 3.5rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,229,192,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feat-card:hover { border-color: rgba(0,229,192,0.35); transform: translateY(-4px); }
+    .feat-card:hover::before { opacity: 1; }
+
+    .feat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .feat-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .feat-card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-bg {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2.5rem;
+      counter-reset: step;
+    }
+
+    .step {
+      counter-increment: step;
+      position: relative;
+    }
+
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: rgba(0,229,192,0.12);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .step h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── DEMO BLOCK ── */
+    .demo-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .demo-wrap { grid-template-columns: 1fr; }
+    }
+
+    .demo-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .demo-card .lang-tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .demo-card .bubble {
+      background: rgba(0,229,192,0.07);
+      border: 1px solid rgba(0,229,192,0.15);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-card .translation {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .demo-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 2rem;
+      align-self: center;
+    }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg) 0%, #031814 100%);
+    }
+
+    .cta-box {
+      background: var(--card);
+      border: 1px solid rgba(0,229,192,0.2);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(0,229,192,0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-box h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      color: var(--muted);
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    .free-tag {
+      display: inline-block;
+      background: rgba(0,229,192,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(0,229,192,0.3);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer .logo { font-size: 1.2rem; }
+
+    footer p { color: var(--muted); font-size: 0.85rem; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav .cta-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">D<span> Lingo</span></a>
+  <a href="https://dlingo-eight.vercel.app/" class="cta-nav" target="_blank">Try Free →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge">
+    <span class="pulse-dot"></span>
+    Live Translation · No Signup · 100% Free
+  </div>
+
+  <h1>Speak Any Language.<br><em>Instantly.</em></h1>
+
+  <p>Real-time voice translation across 25+ languages. Just open, tap, and talk — no account needed.</p>
+
+  <div class="hero-ctas">
+    <a href="https://dlingo-eight.vercel.app/" class="btn-primary" target="_blank">
+      🎙️ Start Translating Free
+    </a>
+    <a href="#how" class="btn-ghost">See How It Works</a>
+  </div>
+
+  <!-- Language Ticker -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">Why D Lingo</div>
+  <h2 class="section-heading">Translation that keeps up with conversation.</h2>
+  <p class="section-sub">No lag. No subscriptions. Just clear, fast voice translation in real time.</p>
+
+  <div class="features-grid reveal">
+    <div class="feat-card">
+      <span class="feat-icon">🎙️</span>
+      <h3>Real-Time Voice</h3>
+      <p>Speak naturally and hear the translation instantly. No typing, no waiting — just speak and be understood.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🌐</span>
+      <h3>25+ Languages</h3>
+      <p>Telugu, Hindi, English, Spanish, French, Arabic, Japanese, and many more. Major world languages covered.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">⚡</span>
+      <h3>Zero Signup</h3>
+      <p>Open the app and you're ready. No registration, no email, no passwords. Privacy-first by design.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">📱</span>
+      <h3>Works on Any Device</h3>
+      <p>Fully responsive web app. Use it on mobile, tablet, or desktop — no installation required.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🔁</span>
+      <h3>Two-Way Translation</h3>
+      <p>Both speakers hear each other in their own language. Perfect for live conversations across language barriers.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">💼</span>
+      <h3>BPO & Business Ready</h3>
+      <p>Built for call centers and multilingual teams. Reduce communication gaps without expensive tools.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how-bg">
+  <div class="section-label">How It Works</div>
+  <h2 class="section-heading">Three steps to speak any language.</h2>
+  <p class="section-sub">No setup. No learning curve. It just works.</p>
+
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Open D Lingo</h3>
+      <p>Visit the app on any browser. No download, no account needed.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Choose Languages</h3>
+      <p>Select your language and the language you want to translate to from 25+ options.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Tap & Talk</h3>
+      <p>Press the mic button and speak. Your voice is translated and played back in real time.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>Share the Link</h3>
+      <p>Let the other person open D Lingo too. Now both sides understand each other instantly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO PREVIEW -->
+<section id="demo" style="text-align:center;">
+  <div class="section-label">Live Example</div>
+  <h2 class="section-heading" style="margin:0 auto 1rem;">Hear it, believe it.</h2>
+  <p class="section-sub" style="margin:0 auto 3rem;">Here's what a real conversation looks like with D Lingo.</p>
+
+  <div class="demo-wrap reveal">
+    <div class="demo-card">
+      <div class="lang-tag">🇮🇳 Telugu</div>
+      <div class="bubble">నమస్కారం! మీరు ఎలా ఉన్నారు?</div>
+      <div class="translation">Hello! How are you?</div>
+    </div>
+
+    <div class="demo-card">
+      <div class="lang-tag">🇺🇸 English</div>
+      <div class="bubble">I'm doing great, thank you!</div>
+      <div class="translation">నేను చాలా బాగున్నాను, ధన్యవాదాలు!</div>
+    </div>
+  </div>
+
+  <p style="color:var(--muted); margin-top: 2rem; font-size: 0.9rem;">⚡ This happens in real time, live, as you speak.</p>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-box reveal">
+    <span class="free-tag">✓ Completely Free</span>
+    <h2>Break every language barrier. Right now.</h2>
+    <p>No account. No app store. Just open and speak.</p>
+    <a href="https://dlingo-eight.vercel.app/" class="btn-primary" target="_blank" style="font-size:1.05rem; padding: 1rem 2.5rem;">
+      🎙️ Open D Lingo Free
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="logo">D<span> Lingo</span></a>
+  <p>© 2025 D Lingo · Free Real-Time Voice Translator</p>
+  <p style="color:var(--muted); font-size:0.8rem;">25+ Languages · No Signup · Always Free</p>
+</footer>
+
+<script>
+  // ── Language Ticker ──
+  const langs = [
+    { flag: '🇮🇳', name: 'Telugu' },
+    { flag: '🇮🇳', name: 'Hindi' },
+    { flag: '🇺🇸', name: 'English' },
+    { flag: '🇪🇸', name: 'Spanish' },
+    { flag: '🇫🇷', name: 'French' },
+    { flag: '🇸🇦', name: 'Arabic' },
+    { flag: '🇧🇷', name: 'Portuguese' },
+    { flag: '🇩🇪', name: 'German' },
+    { flag: '🇯🇵', name: 'Japanese' },
+    { flag: '🇨🇳', name: 'Chinese' },
+    { flag: '🇰🇷', name: 'Korean' },
+    { flag: '🇷🇺', name: 'Russian' },
+    { flag: '🇮🇹', name: 'Italian' },
+    { flag: '🇹🇷', name: 'Turkish' },
+    { flag: '🇮🇩', name: 'Indonesian' },
+    { flag: '🇳🇱', name: 'Dutch' },
+    { flag: '🇵🇱', name: 'Polish' },
+    { flag: '🇺🇦', name: 'Ukrainian' },
+    { flag: '🇹🇭', name: 'Thai' },
+    { flag: '🇻🇳', name: 'Vietnamese' },
+    { flag: '🇸🇪', name: 'Swedish' },
+    { flag: '🇬🇷', name: 'Greek' },
+    { flag: '🇮🇱', name: 'Hebrew' },
+    { flag: '🇵🇰', name: 'Urdu' },
+    { flag: '🇧🇩', name: 'Bengali' },
+    { flag: '🇮🇳', name: 'Tamil' },
+  ];
+
+  const ticker = document.getElementById('ticker');
+  const doubled = [...langs, ...langs];
+  doubled.forEach(l => {
+    const pill = document.createElement('div');
+    pill.className = 'lang-pill';
+    pill.innerHTML = `<span class="flag">${l.flag}</span>${l.name}`;
+    ticker.appendChild(pill);
+  });
+
+  // ── Scroll Reveal ──
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
