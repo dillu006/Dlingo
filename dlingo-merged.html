@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>D Lingo - Free Real-Time Voice Translator</title>
+<meta name="description" content="Free real-time voice translator supporting 25+ languages. No signup required.">
+<meta name="keywords" content="voice translator, language translator, AI translator, free translator, D Lingo">
+<meta name="author" content="D Lingo">
+<meta name="theme-color" content="#070c0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="D Lingo">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<meta property="og:title" content="D Lingo – Free Real-Time Voice Translator">
+<meta property="og:description" content="Speak in any language. Be heard in theirs. Free, instant, no signup.">
+<meta property="og:url" content="https://dlingo-eight.vercel.app/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══ BASE ══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+/* ══ LANDING VARIABLES ══ */
+:root{
+  --bg:#070c0e;--surface:#0d1618;--border:#1a2e32;
+  --accent:#00e5c0;--accent2:#00aeff;--text:#e8f4f6;--muted:#6b8f95;--card:#0f1e21;
+}
+
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;
+}
+body.app-mode{overflow:hidden;height:100%}
+
+/* noise overlay on landing */
+#landing-page::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ══ NAV ══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 5%;background:rgba(7,12,14,0.85);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent);letter-spacing:-0.02em;text-decoration:none}
+.logo span{color:var(--text)}
+nav button.cta-nav{
+  background:var(--accent);color:#070c0e;font-weight:500;padding:0.5rem 1.3rem;
+  border-radius:100px;font-size:0.9rem;transition:opacity 0.2s;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;
+}
+nav button.cta-nav:hover{opacity:0.85}
+
+/* ══ HERO ══ */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:7rem 5% 5rem;position:relative;overflow:hidden;
+}
+.hero-glow{
+  position:absolute;width:700px;height:700px;
+  background:radial-gradient(circle,rgba(0,229,192,0.12) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-55%);pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(0,229,192,0.1);border:1px solid rgba(0,229,192,0.25);
+  color:var(--accent);font-size:0.8rem;font-weight:500;padding:0.35rem 1rem;
+  border-radius:100px;margin-bottom:2rem;animation:fadeUp 0.7s ease both;
+}
+.pulse-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulseLand 1.8s ease infinite}
+@keyframes pulseLand{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+.hero h1{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(2.8rem,7vw,6rem);line-height:1.05;letter-spacing:-0.03em;
+  margin-bottom:1.5rem;animation:fadeUp 0.7s 0.1s ease both;
+}
+.hero h1 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero p{font-size:1.2rem;color:var(--muted);max-width:520px;margin:0 auto 2.5rem;font-weight:300;animation:fadeUp 0.7s 0.2s ease both}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.7s 0.3s ease both}
+
+.btn-primary{
+  background:var(--accent);color:#070c0e;font-family:'DM Sans',sans-serif;
+  font-weight:500;font-size:1rem;padding:0.85rem 2.2rem;border-radius:100px;
+  border:none;cursor:pointer;text-decoration:none;display:inline-flex;
+  align-items:center;gap:0.5rem;transition:transform 0.2s,box-shadow 0.2s;
+  box-shadow:0 0 30px rgba(0,229,192,0.25);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 45px rgba(0,229,192,0.4)}
+.btn-ghost{
+  background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-weight:400;font-size:1rem;padding:0.85rem 2.2rem;border-radius:100px;
+  border:1px solid var(--border);cursor:pointer;text-decoration:none;
+  transition:border-color 0.2s,color 0.2s;
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ══ TICKER ══ */
+.ticker-wrap{overflow:hidden;padding:2rem 0;position:relative;margin:2rem 0 0;animation:fadeUp 0.7s 0.5s ease both}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:120px;z-index:2}
+.ticker-wrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.ticker-wrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.ticker{display:flex;gap:1.5rem;width:max-content;animation:tickerAnim 28s linear infinite}
+@keyframes tickerAnim{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.lang-pill{
+  display:flex;align-items:center;gap:0.5rem;background:var(--card);
+  border:1px solid var(--border);padding:0.4rem 1rem;border-radius:100px;
+  white-space:nowrap;font-size:0.85rem;color:var(--muted);
+}
+.lang-pill .flag{font-size:1.1rem}
+
+/* ══ SECTIONS ══ */
+section{padding:6rem 5%;position:relative}
+.section-label{font-size:0.75rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.section-heading{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;max-width:600px}
+.section-sub{color:var(--muted);font-weight:300;max-width:500px;margin-bottom:3.5rem}
+
+/* ══ FEATURES ══ */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.feat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:2rem;transition:border-color 0.3s,transform 0.3s;position:relative;overflow:hidden;
+}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,229,192,0.04),transparent);opacity:0;transition:opacity 0.3s}
+.feat-card:hover{border-color:rgba(0,229,192,0.35);transform:translateY(-4px)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{font-size:2rem;margin-bottom:1rem;display:block}
+.feat-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem}
+.feat-card p{color:var(--muted);font-size:0.92rem;line-height:1.65}
+
+/* ══ HOW IT WORKS ══ */
+.how-bg{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2.5rem}
+.step-num{font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;color:rgba(0,229,192,0.12);line-height:1;margin-bottom:0.5rem}
+.step h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:0.5rem}
+.step p{color:var(--muted);font-size:0.9rem}
+
+/* ══ DEMO ══ */
+.demo-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:760px;margin:0 auto}
+@media(max-width:600px){.demo-wrap{grid-template-columns:1fr}}
+.demo-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem;text-align:center}
+.demo-card .lang-tag{font-size:0.75rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:0.75rem}
+.demo-card .bubble{background:rgba(0,229,192,0.07);border:1px solid rgba(0,229,192,0.15);border-radius:12px;padding:1rem 1.2rem;font-size:1.1rem;margin-bottom:0.5rem}
+.demo-card .translation{color:var(--muted);font-size:0.85rem;font-style:italic}
+
+/* ══ CTA SECTION ══ */
+.cta-section{text-align:center;background:linear-gradient(180deg,var(--bg) 0%,#031814 100%)}
+.cta-box{
+  background:var(--card);border:1px solid rgba(0,229,192,0.2);border-radius:24px;
+  padding:4rem 2rem;max-width:680px;margin:0 auto;position:relative;overflow:hidden;
+}
+.cta-box::before{
+  content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:300px;height:300px;background:radial-gradient(circle,rgba(0,229,192,0.15),transparent 70%);pointer-events:none;
+}
+.cta-box h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:1rem}
+.cta-box p{color:var(--muted);margin-bottom:2rem;font-size:1.05rem}
+.free-tag{
+  display:inline-block;background:rgba(0,229,192,0.12);color:var(--accent);
+  border:1px solid rgba(0,229,192,0.3);font-size:0.8rem;font-weight:500;
+  padding:0.3rem 0.9rem;border-radius:100px;margin-bottom:1.5rem;
+}
+
+/* ══ FOOTER ══ */
+footer{border-top:1px solid var(--border);padding:2rem 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+footer .logo{font-size:1.2rem}
+footer p{color:var(--muted);font-size:0.85rem}
+
+/* ══ ANIMATIONS ══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+@media(max-width:768px){nav .cta-nav{display:none}}
+
+/* ══ LANDING PAGE TRANSITION ══ */
+#landing-page{transition:opacity 0.3s ease}
+#landing-page.hidden{opacity:0;pointer-events:none}
+
+/* ══════════════════════════════════════════
+   APP CONTAINER
+══════════════════════════════════════════ */
+#app-container{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:#0a0f14;font-family:'Outfit',sans-serif;color:#e8f4f0;
+}
+#app-container.visible{display:block;animation:fadeUp 0.3s ease}
+
+/* ══ APP INTERNAL STYLES ══ */
+#app{
+  max-width:430px;margin:0 auto;height:100vh;
+  display:flex;flex-direction:column;overflow:hidden;font-family:'Outfit',sans-serif;
+}
+#app button{font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation;border:none;outline:none;cursor:pointer}
+#app input,#app textarea{font-family:'Outfit',sans-serif;outline:none}
+#app ::-webkit-scrollbar{width:2px}
+#app ::-webkit-scrollbar-thumb{background:#1e2d3d;border-radius:2px}
+
+.scr{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUpApp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulseApp{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes glowApp{0%,100%{box-shadow:0 0 8px #00e5a044}50%{box-shadow:0 0 24px #00e5a088}}
+
+.sbar{background:#070d12;padding:6px 18px 5px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.bnav{display:flex;border-top:1px solid #1e2d3d;background:#111920;flex-shrink:0}
+.nb{flex:1;padding:8px 0 6px;background:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nb .ni{font-size:19px}.nb .nl{font-size:9px;color:#5a7a8a}
+.nb.on .nl{color:#00e5a0}.ndot{width:20px;height:2px;border-radius:1px;background:#00e5a0}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;user-select:none}
+.card-a{background:#111920;border:1px solid #1e2d3d;border-radius:12px}
+.so{position:fixed;inset:0;background:#000b;z-index:300;display:flex;flex-direction:column;justify-content:flex-end}
+.sh{background:#111920;border-radius:20px 20px 0 0;max-height:75vh;overflow-y:auto;animation:fadeUpApp .25s ease;padding:0 0 28px}
+.shh{width:36px;height:4px;border-radius:2px;background:#1e2d3d;margin:12px auto 8px}
+.pillA{border-radius:20px;padding:2px 9px;font-size:10px}
+.tog{width:46px;height:25px;border-radius:13px;flex-shrink:0;cursor:pointer;position:relative;transition:background .25s}
+.tok{position:absolute;top:3.5px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .25s;box-shadow:0 1px 4px #0008}
+.bp{background:linear-gradient(135deg,#00e5a0,#00c896);color:#0a0f14;font-weight:600;border-radius:12px;padding:13px 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
+.bs{background:#16222d;border:1px solid #1e2d3d;color:#e8f4f0;font-weight:600;border-radius:12px;padding:13px 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
+.bgA{background:transparent;border:1px solid #1e2d3d;color:#5a7a8a;font-weight:600;border-radius:12px;padding:13px 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
+.bd{background:#2a0f0f;border:1px solid #4a1a1a;color:#ff5555;border-radius:8px;padding:6px 12px;font-size:12px}
+.bsm{padding:7px 13px!important;font-size:12px!important}
+.wbar{background:#1a1200;border-bottom:1px solid #3a2800;padding:5px 14px;font-size:10px;color:#c8a040;flex-shrink:0}
+.dpad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.dkey{background:#16222d;border:1px solid #1e2d3d;border-radius:12px;padding:14px 0;display:flex;flex-direction:column;align-items:center;gap:1px;user-select:none}
+.dkey:active{background:#1e2d3d}
+.dkd{font-size:22px;color:#e8f4f0;font-weight:500}
+.dks{font-size:8px;color:#5a7a8a;letter-spacing:.1em}
+.cgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cb{padding:10px 0;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px}
+.cb .ci{font-size:20px}
+.mo{position:fixed;inset:0;background:#000c;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.md{background:#111920;border:1px solid #1e2d3d;border-radius:20px;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;animation:fadeUpApp .25s ease}
+.ls-app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:linear-gradient(160deg,#0a0f14 55%,#0a2a1e)}
+
+.home-btn{background:none!important;border:1px solid #1e2d3d!important;border-radius:8px!important;color:#5a7a8a!important;font-size:11px!important;padding:3px 8px!important;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════════ -->
+<div id="landing-page">
+
+<nav>
+  <a href="#" class="logo">D<span> Lingo</span></a>
+  <button class="cta-nav" onclick="showApp()">Try Free →</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge"><span class="pulse-dot"></span>Live Translation · No Signup · 100% Free</div>
+  <h1>Speak Any Language.<br><em>Instantly.</em></h1>
+  <p>Real-time voice translation across 25+ languages. Just open, tap, and talk — no account needed.</p>
+  <div class="hero-ctas">
+    <button class="btn-primary" onclick="showApp()">🎙️ Start Translating Free</button>
+    <a href="#how" class="btn-ghost">See How It Works</a>
+  </div>
+  <div class="ticker-wrap"><div class="ticker" id="ticker"></div></div>
+</section>
+
+<section id="features">
+  <div class="section-label">Why D Lingo</div>
+  <h2 class="section-heading">Translation that keeps up with conversation.</h2>
+  <p class="section-sub">No lag. No subscriptions. Just clear, fast voice translation in real time.</p>
+  <div class="features-grid reveal">
+    <div class="feat-card"><span class="feat-icon">🎙️</span><h3>Real-Time Voice</h3><p>Speak naturally and hear the translation instantly. No typing, no waiting — just speak and be understood.</p></div>
+    <div class="feat-card"><span class="feat-icon">🌐</span><h3>25+ Languages</h3><p>Telugu, Hindi, English, Spanish, French, Arabic, Japanese, and many more. Major world languages covered.</p></div>
+    <div class="feat-card"><span class="feat-icon">⚡</span><h3>Zero Signup</h3><p>Open the app and you're ready. No registration, no email, no passwords. Privacy-first by design.</p></div>
+    <div class="feat-card"><span class="feat-icon">📱</span><h3>Works on Any Device</h3><p>Fully responsive web app. Use it on mobile, tablet, or desktop — no installation required.</p></div>
+    <div class="feat-card"><span class="feat-icon">🔁</span><h3>Two-Way Translation</h3><p>Both speakers hear each other in their own language. Perfect for live conversations across language barriers.</p></div>
+    <div class="feat-card"><span class="feat-icon">💼</span><h3>BPO & Business Ready</h3><p>Built for call centers and multilingual teams. Reduce communication gaps without expensive tools.</p></div>
+  </div>
+</section>
+
+<section id="how" class="how-bg">
+  <div class="section-label">How It Works</div>
+  <h2 class="section-heading">Three steps to speak any language.</h2>
+  <p class="section-sub">No setup. No learning curve. It just works.</p>
+  <div class="steps reveal">
+    <div class="step"><div class="step-num">01</div><h3>Open D Lingo</h3><p>Visit the app on any browser. No download, no account needed.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>Choose Languages</h3><p>Select your language and the language you want to translate to from 25+ options.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>Tap & Talk</h3><p>Press the mic button and speak. Your voice is translated and played back in real time.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Share the Link</h3><p>Let the other person open D Lingo too. Now both sides understand each other instantly.</p></div>
+  </div>
+</section>
+
+<section id="demo" style="text-align:center">
+  <div class="section-label">Live Example</div>
+  <h2 class="section-heading" style="margin:0 auto 1rem">Hear it, believe it.</h2>
+  <p class="section-sub" style="margin:0 auto 3rem">Here's what a real conversation looks like with D Lingo.</p>
+  <div class="demo-wrap reveal">
+    <div class="demo-card">
+      <div class="lang-tag">🇮🇳 Telugu</div>
+      <div class="bubble">నమస్కారం! మీరు ఎలా ఉన్నారు?</div>
+      <div class="translation">Hello! How are you?</div>
+    </div>
+    <div class="demo-card">
+      <div class="lang-tag">🇺🇸 English</div>
+      <div class="bubble">I'm doing great, thank you!</div>
+      <div class="translation">నేను చాలా బాగున్నాను, ధన్యవాదాలు!</div>
+    </div>
+  </div>
+  <p style="color:var(--muted);margin-top:2rem;font-size:0.9rem">⚡ This happens in real time, live, as you speak.</p>
+</section>
+
+<section class="cta-section">
+  <div class="cta-box reveal">
+    <span class="free-tag">✓ Completely Free</span>
+    <h2>Break every language barrier. Right now.</h2>
+    <p>No account. No app store. Just open and speak.</p>
+    <button class="btn-primary" onclick="showApp()" style="font-size:1.05rem;padding:1rem 2.5rem">🎙️ Open D Lingo Free</button>
+  </div>
+</section>
+
+<footer>
+  <a href="#" class="logo">D<span> Lingo</span></a>
+  <p>© 2025 D Lingo · Free Real-Time Voice Translator</p>
+  <p style="color:var(--muted);font-size:0.8rem">25+ Languages · No Signup · Always Free</p>
+</footer>
+
+</div><!-- /landing-page -->
+
+<!-- ══════════════════════════════════════════
+     APP
+══════════════════════════════════════════ -->
+<div id="app-container">
+  <div id="app"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#00e5a0;font-size:24px">🌐 Loading…</div></div>
+</div>
+
+<script>
+/* ══ PAGE TRANSITIONS ══ */
+function showApp(){
+  document.getElementById('landing-page').classList.add('hidden');
+  document.getElementById('app-container').classList.add('visible');
+  document.body.classList.add('app-mode');
+}
+function showLanding(){
+  document.getElementById('landing-page').classList.remove('hidden');
+  document.getElementById('app-container').classList.remove('visible');
+  document.body.classList.remove('app-mode');
+}
+
+/* ══ LANDING JS ══ */
+const LLANGS=[
+  {flag:'🇮🇳',name:'Telugu'},{flag:'🇮🇳',name:'Hindi'},{flag:'🇺🇸',name:'English'},
+  {flag:'🇪🇸',name:'Spanish'},{flag:'🇫🇷',name:'French'},{flag:'🇸🇦',name:'Arabic'},
+  {flag:'🇧🇷',name:'Portuguese'},{flag:'🇩🇪',name:'German'},{flag:'🇯🇵',name:'Japanese'},
+  {flag:'🇨🇳',name:'Chinese'},{flag:'🇰🇷',name:'Korean'},{flag:'🇷🇺',name:'Russian'},
+  {flag:'🇮🇹',name:'Italian'},{flag:'🇹🇷',name:'Turkish'},{flag:'🇮🇩',name:'Indonesian'},
+  {flag:'🇳🇱',name:'Dutch'},{flag:'🇵🇱',name:'Polish'},{flag:'🇺🇦',name:'Ukrainian'},
+  {flag:'🇹🇭',name:'Thai'},{flag:'🇻🇳',name:'Vietnamese'},{flag:'🇸🇪',name:'Swedish'},
+  {flag:'🇬🇷',name:'Greek'},{flag:'🇮🇱',name:'Hebrew'},{flag:'🇵🇰',name:'Urdu'},
+  {flag:'🇧🇩',name:'Bengali'},{flag:'🇮🇳',name:'Tamil'},
+];
+const tickerEl=document.getElementById('ticker');
+[...LLANGS,...LLANGS].forEach(l=>{
+  const p=document.createElement('div');p.className='lang-pill';
+  p.innerHTML=`<span class="flag">${l.flag}</span>${l.name}`;tickerEl.appendChild(p);
+});
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+
+/* ══ APP DATA ══ */
+const COUNTRIES=[
+  {name:"India",flag:"🇮🇳",code:"+91",lang:"Telugu",lc:"TE",sc:"te-IN"},
+  {name:"United States",flag:"🇺🇸",code:"+1",lang:"English",lc:"EN",sc:"en-US"},
+  {name:"Spain",flag:"🇪🇸",code:"+34",lang:"Spanish",lc:"ES",sc:"es-ES"},
+  {name:"France",flag:"🇫🇷",code:"+33",lang:"French",lc:"FR",sc:"fr-FR"},
+  {name:"Germany",flag:"🇩🇪",code:"+49",lang:"German",lc:"DE",sc:"de-DE"},
+  {name:"Japan",flag:"🇯🇵",code:"+81",lang:"Japanese",lc:"JA",sc:"ja-JP"},
+  {name:"China",flag:"🇨🇳",code:"+86",lang:"Chinese",lc:"ZH",sc:"zh-CN"},
+  {name:"Brazil",flag:"🇧🇷",code:"+55",lang:"Portuguese",lc:"PT",sc:"pt-BR"},
+  {name:"Saudi Arabia",flag:"🇸🇦",code:"+966",lang:"Arabic",lc:"AR",sc:"ar-SA"},
+  {name:"South Korea",flag:"🇰🇷",code:"+82",lang:"Korean",lc:"KO",sc:"ko-KR"},
+];
+const CONTACTS=[
+  {id:1,name:"Priya Sharma",init:"PS",phone:"98765 43210",country:COUNTRIES[0],color:"#4fc3f7",fav:true},
+  {id:2,name:"Carlos Rivera",init:"CR",phone:"612 345 678",country:COUNTRIES[2],color:"#81c784",fav:true},
+  {id:3,name:"Yuki Tanaka",init:"YT",phone:"90 1234 5678",country:COUNTRIES[5],color:"#ffb74d",fav:false},
+  {id:4,name:"Alex Johnson",init:"AJ",phone:"555 234 5678",country:COUNTRIES[1],color:"#4dd0e1",fav:false},
+  {id:5,name:"Marie Dubois",init:"MD",phone:"6 12 34 56",country:COUNTRIES[3],color:"#ce93d8",fav:true},
+  {id:6,name:"Wei Chen",init:"WC",phone:"138 0000 1234",country:COUNTRIES[6],color:"#ef9a9a",fav:false},
+];
+const RECENTS=[
+  {id:1,cid:1,time:"2:34 PM",dur:"8m 23s",type:"translated",date:"TODAY"},
+  {id:2,cid:2,time:"11:15 AM",dur:"3m 10s",type:"outgoing",date:"TODAY"},
+  {id:3,cid:4,time:"9:02 AM",dur:"",type:"missed",date:"TODAY"},
+  {id:4,cid:5,time:"6:45 PM",dur:"12m 5s",type:"incoming",date:"YESTERDAY"},
+  {id:5,cid:3,time:"10:30 AM",dur:"5m 44s",type:"translated",date:"YESTERDAY"},
+];
+const TM={
+  translated:{label:"🌐 Translated",color:"#00e5a0",bg:"#0a2a1e",bd:"#1a4a30"},
+  outgoing:{label:"↗ Outgoing",color:"#7986cb",bg:"#181e3a",bd:"#282e5a"},
+  missed:{label:"✕ Missed",color:"#ff5555",bg:"#2a0f0f",bd:"#4a1a1a"},
+  incoming:{label:"↙ Incoming",color:"#7986cb",bg:"#181e3a",bd:"#282e5a"}
+};
+const TERMS="Last updated: March 2026\n\n1. ACCEPTANCE\nBy using D Lingo you agree to these Terms.\n\n2. SERVICE DESCRIPTION\nD Lingo provides AI-assisted real-time voice and text translation. Translation accuracy is not guaranteed. Do not rely on D Lingo for legal, medical, emergency, or safety-critical communications.\n\n3. DISCLAIMER OF WARRANTIES\nThe translation service is provided 'AS IS' without warranties of any kind.\n\n4. LIMITATION OF LIABILITY\nD Lingo is not liable for any damages arising from use or reliance on translations.\n\n5. GOVERNING LAW\nThese terms are governed by the laws of India.\n\n6. CONTACT\nlegal@dlingo.app";
+const PRIVACY="Last updated: March 2026\n\n1. INFORMATION WE COLLECT\nD Lingo collects only information necessary to provide translation services: voice audio (processed in real-time, not stored), language preferences, and account details.\n\n2. HOW WE USE YOUR INFORMATION\nVoice audio is sent to AI APIs solely for translation. We do not record or store calls. We do not sell your data.\n\n3. DATA RETENTION\nAccount data is retained while your account is active.\n\n4. SECURITY\nWe implement industry-standard security practices.\n\n5. CONTACT\nprivacy@dlingo.app";
+const AI_DIS="D Lingo uses AI for real-time translation.\n\n1. ACCURACY\nAI translations may contain errors. Accuracy varies by language pair.\n\n2. NOT FOR CRITICAL USE\nDo NOT use for medical, legal, or emergency situations.\n\n3. DATA PROCESSING\nVoice audio is processed by AI APIs in real-time. Audio is not stored by D Lingo.\n\n4. HUMAN REVIEW\nVerify important translations with a qualified human translator.";
+
+/* ══ APP STATE ══ */
+let S={
+  screen:"login",user:null,tab:"dial",
+  callC:null,chatC:null,dialNum:"",dialCt:COUNTRIES[0],
+  settings:{autoDetect:true,e2e:true,notifs:true,dark:true},
+  contactOpen:null,callSecs:0,callTimer:null,
+  callMuted:false,callSpeaker:false,callTransOn:true,callHold:false,callTab:"live",
+  callMsgs:[
+    {id:1,side:"them",orig:'"నమస్కారం! మీరు ఎలా ఉన్నారు?"',xlat:'"Hello! How are you?"'},
+    {id:2,side:"me",orig:'"Hello! I am doing great, thanks!"',xlat:'"నేను బాగున్నాను, ధన్యవాదాలు!"'},
+    {id:3,side:"them",orig:'"మీ ప్రాజెక్ట్ ఎలా వెళ్తోంది?"',xlat:'"How is your project going?"'}
+  ],
+  chatMsgs:[
+    {id:1,side:"them",text:"నమస్కారం! ఎలా ఉన్నారు?",xlat:"Hello! How are you?",ts:"9:41 AM"},
+    {id:2,side:"me",text:"I am doing great, thanks!",xlat:"నేను బాగున్నాను, ధన్యవాదాలు!",ts:"9:42 AM"},
+    {id:3,side:"them",text:"మీ project ఎలా వెళ్తోంది?",xlat:"How is your project going?",ts:"9:43 AM"}
+  ],
+  legalModal:null,sheetOpen:null
+};
+
+/* ══ HELPERS ══ */
+function e(tag,cls,style,children,events){
+  const el=document.createElement(tag);
+  if(cls)el.className=cls;
+  if(style)Object.assign(el.style,style);
+  if(children)for(const c of[].concat(children)){if(c==null)continue;if(typeof c==='string'||typeof c==='number')el.appendChild(document.createTextNode(String(c)));else el.appendChild(c);}
+  if(events)for(const[k,v]of Object.entries(events))el.addEventListener(k,v);
+  return el;
+}
+const T=t=>document.createTextNode(t);
+const fmt2=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+const nowTs=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+
+function av(init,color,size){
+  const d=e('div','av',{width:size+'px',height:size+'px',background:color+'22',border:`2px solid ${color}55`,fontSize:(size*.34)+'px',color});
+  d.textContent=init;return d;
+}
+function togEl(on,cb){
+  const w=e('div','tog',{background:on?'#00e5a0':'#253040'});
+  const k=e('div','tok',{left:on?'24px':'3px'});
+  w.appendChild(k);w.addEventListener('click',cb);return w;
+}
+function pillEl(type){
+  const m=TM[type];
+  const s=e('span','pillA',{background:m.bg,border:`1px solid ${m.bd}`,color:m.color});
+  s.textContent=m.label;return s;
+}
+async function aiXlat(text,lang){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,
+      messages:[{role:"user",content:`Translate to ${lang}. Return ONLY translated text.\n\nText: ${text}`}]})
+  });
+  const d=await res.json();return d.content?.[0]?.text?.trim()||"…";
+}
+
+/* ══ RENDER ══ */
+function render(){
+  const app=document.getElementById('app');
+  app.innerHTML='';
+  if(S.legalModal){app.appendChild(legalMod());return;}
+  if(S.screen==='login'){app.appendChild(loginScr());return;}
+  if(S.screen==='welcome'){app.appendChild(welcomeScr());return;}
+  app.appendChild(sbar());
+  const w=e('div','scr');
+  if(S.callC)w.appendChild(callScr());
+  else if(S.chatC)w.appendChild(chatScr());
+  else if(S.tab==='dial')w.appendChild(dialScr());
+  else if(S.tab==='contacts')w.appendChild(contactsScr());
+  else if(S.tab==='recent')w.appendChild(recentScr(false));
+  else if(S.tab==='missed')w.appendChild(recentScr(true));
+  else if(S.tab==='settings')w.appendChild(settingsScr());
+  app.appendChild(w);
+  if(!S.callC&&!S.chatC)app.appendChild(bnav());
+  if(S.sheetOpen)app.appendChild(sheetOv());
+}
+
+function sbar(){
+  const d=new Date(),t2=`${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const bar=e('div','sbar');
+  const hb=e('button','home-btn',{},{},{click:showLanding});
+  hb.textContent='🏠 Home';
+  bar.appendChild(hb);
+  bar.appendChild(e('span',null,{fontSize:'13px',fontWeight:'600',color:'#e8f4f0'},[t2]));
+  bar.appendChild(e('span',null,{fontSize:'13px'},['📶🛜🔋']));
+  return bar;
+}
+
+function bnav(){
+  const tabs=[{id:'dial',icon:'⌨️',label:'Dial'},{id:'contacts',icon:'👥',label:'Contacts'},{id:'recent',icon:'🕐',label:'Recent'},{id:'missed',icon:'📵',label:'Missed'},{id:'settings',icon:'⚙️',label:'Settings'}];
+  return e('div','bnav',{},tabs.map(tb=>{
+    const on=S.tab===tb.id;
+    const btn=e('button','nb'+(on?' on':''),{},{},{click:()=>{S.tab=tb.id;render();}});
+    btn.appendChild(e('span','ni',{},[tb.icon]));
+    btn.appendChild(e('span','nl',{},[tb.label]));
+    if(on)btn.appendChild(e('div','ndot'));
+    return btn;
+  }));
+}
+
+function legalMod(){
+  const type=S.legalModal;
+  const titles={terms:'Terms of Service',privacy:'Privacy Policy',ai:'AI Disclaimer'};
+  const texts={terms:TERMS,privacy:PRIVACY,ai:AI_DIS};
+  const close=()=>{S.legalModal=null;render();};
+  const ov=e('div','mo',{},{},{click:close});
+  const md=e('div','md',{},{},{click:ev=>ev.stopPropagation()});
+  const hd=e('div',null,{padding:'16px 20px 12px',borderBottom:'1px solid #1e2d3d',display:'flex',justifyContent:'space-between',alignItems:'center'});
+  hd.appendChild(e('span',null,{fontSize:'15px',fontWeight:'700',color:'#e8f4f0'},[titles[type]]));
+  hd.appendChild(e('button',null,{background:'none',color:'#5a7a8a',fontSize:'20px'},['✕'],{click:close}));
+  md.appendChild(hd);
+  const body=e('div',null,{flex:'1',overflowY:'auto',padding:'14px 20px'});
+  texts[type].split('\n').forEach(line=>{
+    const isSec=/^\d+\./.test(line);
+    body.appendChild(e('p',null,{fontSize:isSec?'12px':'11px',fontWeight:isSec?'700':'400',color:isSec?'#e8f4f0':'#5a7a8a',marginBottom:isSec?'6px':'3px',marginTop:isSec?'12px':'0',lineHeight:'1.7'},[line]));
+  });
+  md.appendChild(body);
+  const ft=e('div',null,{padding:'12px 20px 16px',borderTop:'1px solid #1e2d3d'});
+  ft.appendChild(e('button','bp',{width:'100%'},['I Understand'],{click:close}));
+  md.appendChild(ft);ov.appendChild(md);return ov;
+}
+
+function sheetOv(){
+  const type=S.sheetOpen;
+  const close=()=>{S.sheetOpen=null;render();};
+  const ov=e('div','so',{},{},{click:close});
+  const sh=e('div','sh',{},{},{click:ev=>ev.stopPropagation()});
+  sh.appendChild(e('div','shh'));
+  if(type==='country'){
+    sh.appendChild(e('div',null,{padding:'4px 20px 8px',fontSize:'15px',fontWeight:'600',color:'#e8f4f0'},['Select Country']));
+    COUNTRIES.forEach(c=>{
+      const row=e('div',null,{padding:'12px 20px',display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer',borderBottom:'1px solid #0f1a23',background:S.dialCt.code===c.code?'#0d3325':'transparent'},{},{click:()=>{S.dialCt=c;S.sheetOpen=null;render();}});
+      const lft=e('div',null,{display:'flex',alignItems:'center',gap:'12px'});
+      lft.appendChild(e('span',null,{fontSize:'22px'},[c.flag]));
+      const info=e('div');
+      info.appendChild(e('div',null,{fontSize:'14px',color:'#e8f4f0'},[c.name]));
+      info.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a'},[c.lang]));
+      lft.appendChild(info);row.appendChild(lft);
+      row.appendChild(e('span',null,{color:'#00e5a0',fontWeight:'700'},[c.code]));
+      sh.appendChild(row);
+    });
+  }
+  if(type==='callOpts'){
+    const c=S.dialCt,num=S.dialNum;
+    const inner=e('div',null,{padding:'8px 20px 16px'});
+    const top=e('div',null,{display:'flex',alignItems:'center',gap:'12px',marginBottom:'18px'});
+    const ico=e('div',null,{width:'46px',height:'46px',borderRadius:'50%',background:'#0d3325',border:'2px solid #00e5a0',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px'},['📞']);
+    top.appendChild(ico);
+    const info=e('div');
+    info.appendChild(e('div',null,{fontSize:'17px',fontWeight:'600',color:'#e8f4f0'},[`${c.code} ${num}`]));
+    info.appendChild(e('div',null,{fontSize:'12px',color:'#5a7a8a'},[`${c.flag} ${c.name} · ${c.lang}`]));
+    top.appendChild(info);inner.appendChild(top);
+    const btns=e('div',null,{display:'flex',flexDirection:'column',gap:'10px'});
+    btns.appendChild(e('button','bp',{width:'100%'},['📞 Call and Translate'],{click:()=>{S.sheetOpen=null;goCall({id:99,name:`${c.code} ${num}`,init:'#',phone:`${c.code} ${num}`,country:c,color:'#00e5a0',fav:false});}}));
+    btns.appendChild(e('button','bs',{width:'100%'},['📹 Video Call & Translate'],{click:()=>{S.sheetOpen=null;goCall({id:99,name:`${c.code} ${num}`,init:'#',phone:`${c.code} ${num}`,country:c,color:'#ce93d8',fav:false,video:true});}}));
+    btns.appendChild(e('button','bgA',{width:'100%'},['Cancel'],{click:close}));
+    inner.appendChild(btns);sh.appendChild(inner);
+  }
+  ov.appendChild(sh);return ov;
+}
+
+function loginScr(){
+  const wrap=e('div','ls-app');
+  wrap.appendChild(e('div',null,{fontSize:'62px',marginBottom:'14px',filter:'drop-shadow(0 0 18px #00e5a055)'},['🌐']));
+  wrap.appendChild(e('h1',null,{fontSize:'38px',fontWeight:'700',color:'#00e5a0',marginBottom:'4px'},['D Lingo']));
+  wrap.appendChild(e('p',null,{color:'#5a7a8a',fontSize:'13px',marginBottom:'8px'},['Live Call Translator · 10 Languages']));
+  const flags=e('div',null,{display:'flex',gap:'8px',fontSize:'22px',marginBottom:'24px',flexWrap:'wrap',justifyContent:'center'});
+  COUNTRIES.forEach(c=>flags.appendChild(e('span',null,{},[c.flag])));
+  wrap.appendChild(flags);
+  const backBtn=e('button',null,{background:'none',border:'none',color:'#5a7a8a',fontSize:'12px',marginBottom:'16px',cursor:'pointer',textDecoration:'underline'},['← Back to Home'],{click:showLanding});
+  wrap.appendChild(backBtn);
+  let loading=false;
+  const btn=e('button',null,{width:'100%',maxWidth:'340px',padding:'15px 20px',borderRadius:'16px',background:'#fff',border:'1px solid #1e2d3d',display:'flex',alignItems:'center',justifyContent:'center',gap:'12px',fontSize:'15px',fontWeight:'600',color:'#111',animation:'glowApp 2s infinite'});
+  btn.appendChild(e('span',null,{fontSize:'22px',fontWeight:'800',color:'#4285f4'},['G']));
+  btn.appendChild(T(' Continue with Google'));
+  btn.addEventListener('click',()=>{
+    if(loading)return;loading=true;
+    btn.innerHTML='<div style="width:18px;height:18px;border:2px solid #ccc;border-top:2px solid #4285f4;border-radius:50%;animation:spin .8s linear infinite;display:inline-block"></div>&nbsp;Signing in…';
+    setTimeout(()=>{S.user={name:'Dilipkumar',email:'dilip@gmail.com'};S.screen='welcome';render();},1800);
+  });
+  wrap.appendChild(btn);
+  const lp=e('div',null,{marginTop:'20px',fontSize:'11px',color:'#5a7a8a',textAlign:'center',lineHeight:'1.9'});
+  lp.innerHTML="By continuing, you agree to D Lingo's<br/><span style='color:#00e5a0;cursor:pointer;text-decoration:underline' id='lt'>Terms of Service</span> &amp; <span style='color:#00e5a0;cursor:pointer;text-decoration:underline' id='lp'>Privacy Policy</span>";
+  lp.addEventListener('click',ev=>{
+    if(ev.target.id==='lt'){S.legalModal='terms';render();}
+    if(ev.target.id==='lp'){S.legalModal='privacy';render();}
+  });
+  wrap.appendChild(lp);return wrap;
+}
+
+function welcomeScr(){
+  const wrap=e('div','ls-app',{animation:'fadeUpApp .4s ease'});
+  wrap.appendChild(e('div',null,{width:'88px',height:'88px',borderRadius:'50%',background:'#0d3325',border:'3px solid #00e5a0',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'38px',marginBottom:'22px',animation:'glowApp 2s infinite'},['✓']));
+  wrap.appendChild(e('h2',null,{fontSize:'28px',fontWeight:'700',color:'#e8f4f0',marginBottom:'6px'},[`Welcome, ${S.user.name}! 🎉`]));
+  wrap.appendChild(e('p',null,{color:'#5a7a8a',fontSize:'13px',textAlign:'center',lineHeight:'1.8',marginBottom:'26px'},['You are now logged into D Lingo. Break language barriers instantly!']));
+  const box=e('div','card-a',{padding:'16px 24px',marginBottom:'26px',width:'100%',maxWidth:'340px',textAlign:'center'});
+  box.appendChild(e('p',null,{fontSize:'11px',color:'#5a7a8a',marginBottom:'12px'},['Supported Languages']));
+  const flags=e('div',null,{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:'8px',fontSize:'26px'});
+  COUNTRIES.forEach(c=>flags.appendChild(e('span',null,{},[c.flag])));
+  box.appendChild(flags);wrap.appendChild(box);
+  wrap.appendChild(e('button','bp',{width:'100%',maxWidth:'340px',fontSize:'16px',boxShadow:'0 4px 20px #00e5a044'},['Go to D Lingo →'],{click:()=>{S.screen='app';render();}}));
+  return wrap;
+}
+
+function dialScr(){
+  const wrap=e('div','scr');
+  const hdr=e('div',null,{padding:'11px 16px 8px',display:'flex',justifyContent:'space-between',alignItems:'center',flexShrink:'0'});
+  const logo=e('div');logo.appendChild(e('div',null,{fontSize:'22px',fontWeight:'700',color:'#00e5a0'},['D Lingo']));logo.appendChild(e('div',null,{fontSize:'10px',color:'#5a7a8a'},['Live Call Translator']));
+  hdr.appendChild(logo);hdr.appendChild(e('div',null,{background:'#111920',border:'1px solid #1a5a40',borderRadius:'20px',padding:'4px 12px',color:'#00e5a0',fontSize:'11px'},['🌐 10 LANGS']));
+  wrap.appendChild(hdr);
+  const sc=e('div','scroll',{padding:'0 14px 10px'});
+  const csel=e('div','card-a',{padding:'10px 14px',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'},{},{click:()=>{S.sheetOpen='country';render();}});
+  const cl=e('div',null,{display:'flex',alignItems:'center',gap:'10px'});
+  cl.appendChild(e('span',null,{fontSize:'24px'},[S.dialCt.flag]));
+  const ci=e('div');ci.appendChild(e('div',null,{fontSize:'14px',color:'#e8f4f0'},[S.dialCt.name]));ci.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a'},[`${S.dialCt.code} · ${S.dialCt.lc}`]));
+  cl.appendChild(ci);csel.appendChild(cl);csel.appendChild(e('span',null,{color:'#5a7a8a'},['›']));sc.appendChild(csel);
+  const badge=e('div',null,{marginBottom:'8px'});badge.appendChild(e('span',null,{background:'#111920',border:'1px solid #1a5a40',borderRadius:'20px',padding:'4px 12px',fontSize:'11px',color:'#00e5a0'},[`🤖 Auto-detected: ${S.dialCt.lang}`]));sc.appendChild(badge);
+  const nd=e('div','card-a',{padding:'13px 15px',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px',minHeight:'52px',border:`1px solid ${S.dialNum?'#00e5a066':'#1e2d3d'}`});
+  nd.appendChild(e('span',null,{fontSize:S.dialNum?'20px':'14px',color:S.dialNum?'#00e5a0':'#5a7a8a',letterSpacing:'2px',fontWeight:S.dialNum?'600':'400'},[S.dialNum?`${S.dialCt.code} ${S.dialNum}`:'Enter number to call']));
+  if(S.dialNum){const btns=e('div',null,{display:'flex',gap:'4px'});btns.appendChild(e('button',null,{background:'none',color:'#5a7a8a',fontSize:'20px',padding:'0 6px'},['⌫'],{click:()=>{S.dialNum=S.dialNum.slice(0,-1);render();}}));btns.appendChild(e('button',null,{background:'none',color:'#ff555566',fontSize:'14px',padding:'0 4px'},['✕'],{click:()=>{S.dialNum='';render();}}));nd.appendChild(btns);}
+  sc.appendChild(nd);
+  const pad=e('div','dpad',{gap:'8px',marginBottom:'10px'});
+  [['1',''],['2','ABC'],['3','DEF'],['4','GHI'],['5','JKL'],['6','MNO'],['7','PQRS'],['8','TUV'],['9','WXYZ'],['*',''],['0','+'],['#','']].forEach(([d,s])=>{
+    const k=e('button','dkey',{},{},{click:()=>{if(S.dialNum.length<15){S.dialNum+=d;render();}}});
+    k.appendChild(e('span','dkd',{},[d]));if(s)k.appendChild(e('span','dks',{},[s]));pad.appendChild(k);
+  });
+  sc.appendChild(pad);
+  sc.appendChild(e('button',null,{width:'100%',padding:'15px',borderRadius:'14px',background:S.dialNum?'linear-gradient(135deg,#00e5a0,#00c896)':'#111920',color:S.dialNum?'#0a0f14':'#5a7a8a',fontWeight:'700',fontSize:'15px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',marginBottom:'12px',boxShadow:S.dialNum?'0 4px 18px #00e5a044':'none',animation:S.dialNum?'glowApp 2s infinite':'none'},['📞 Call and Translate'],{click:()=>{if(S.dialNum){S.sheetOpen='callOpts';render();}}}));
+  sc.appendChild(e('div',null,{fontSize:'10px',color:'#5a7a8a',letterSpacing:'.1em',marginBottom:'8px'},['QUICK CALL']));
+  CONTACTS.filter(c=>c.fav).forEach(c=>{
+    const row=e('div',null,{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid #0f1a23'});
+    const lft=e('div',null,{display:'flex',alignItems:'center',gap:'10px',flex:'1'});lft.appendChild(av(c.init,c.color,38));
+    const inf=e('div');inf.appendChild(e('div',null,{fontSize:'13px',color:'#e8f4f0'},[c.name]));inf.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a'},[`${c.country.flag} ${c.country.lang}`]));lft.appendChild(inf);row.appendChild(lft);
+    row.appendChild(e('button',null,{width:'36px',height:'36px',borderRadius:'10px',background:'#0d3325',border:'1px solid #1a5a40',color:'#00e5a0',fontSize:'17px',display:'flex',alignItems:'center',justifyContent:'center'},['📞'],{click:()=>goCall(c)}));
+    sc.appendChild(row);
+  });
+  wrap.appendChild(sc);return wrap;
+}
+
+function contactsScr(){
+  const wrap=e('div','scr');
+  const hdr=e('div',null,{padding:'14px 16px 8px',flexShrink:'0'});
+  hdr.appendChild(e('div',null,{fontSize:'24px',fontWeight:'700',color:'#e8f4f0',marginBottom:'2px'},['Contacts']));
+  hdr.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a',marginBottom:'10px'},[`${CONTACTS.length} contacts · ${CONTACTS.filter(c=>c.fav).length} favourites`]));
+  const sb=e('div','card-a',{padding:'9px 14px',display:'flex',gap:'8px',alignItems:'center',borderRadius:'10px'});
+  sb.appendChild(e('span',null,{color:'#5a7a8a'},['🔍']));
+  let q='';
+  const inp=document.createElement('input');inp.placeholder='Search name or number…';Object.assign(inp.style,{flex:'1',background:'none',border:'none',color:'#e8f4f0',fontSize:'13px'});inp.addEventListener('input',ev=>{q=ev.target.value;upd();});
+  sb.appendChild(inp);hdr.appendChild(sb);wrap.appendChild(hdr);
+  const sc=e('div','scroll',{padding:'0 16px 12px'});
+  const favDiv=e('div',null,{marginBottom:'14px'});
+  favDiv.appendChild(e('div',null,{fontSize:'10px',color:'#f0b429',letterSpacing:'.1em',marginBottom:'10px'},['⭐ FAVOURITES']));
+  const favRow=e('div',null,{display:'flex',gap:'16px',overflowX:'auto',paddingBottom:'4px'});
+  CONTACTS.filter(c=>c.fav).forEach(c=>{
+    const item=e('div',null,{display:'flex',flexDirection:'column',alignItems:'center',gap:'4px',cursor:'pointer',minWidth:'58px'},{},{click:()=>goCall(c)});
+    item.appendChild(av(c.init,c.color,50));
+    item.appendChild(e('span',null,{fontSize:'11px',color:'#e8f4f0'},[c.name.split(' ')[0]]));
+    item.appendChild(e('span',null,{fontSize:'15px'},[c.country.flag]));
+    favRow.appendChild(item);
+  });
+  favDiv.appendChild(favRow);sc.appendChild(favDiv);
+  const listDiv=e('div');sc.appendChild(listDiv);wrap.appendChild(sc);
+  function upd(){
+    listDiv.innerHTML='';
+    CONTACTS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)).forEach(c=>{
+      const row=e('div');
+      const top=e('div',null,{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid #0f1a23',cursor:'pointer'},{},{click:()=>{S.contactOpen=S.contactOpen===c.id?null:c.id;upd();}});
+      const lft=e('div',null,{display:'flex',alignItems:'center',gap:'10px',flex:'1'});lft.appendChild(av(c.init,c.color,44));
+      const inf=e('div');inf.appendChild(e('div',null,{fontSize:'14px',color:'#e8f4f0'},[c.name]));
+      const sub=e('div',null,{fontSize:'11px',color:'#5a7a8a'});sub.innerHTML=`${c.country.flag} ${c.country.code} ${c.phone} · <span style="color:#00e5a0">${c.country.lc}</span>`;
+      inf.appendChild(sub);lft.appendChild(inf);top.appendChild(lft);
+      const rgt=e('div',null,{display:'flex',alignItems:'center',gap:'6px'});
+      rgt.appendChild(e('span',null,{fontSize:'16px',color:c.fav?'#f0b429':'#0f1a23'},['★']));
+      rgt.appendChild(e('span',null,{color:'#5a7a8a',fontSize:'13px'},[S.contactOpen===c.id?'▲':'▾']));
+      top.appendChild(rgt);row.appendChild(top);
+      if(S.contactOpen===c.id){
+        const acts=e('div',null,{display:'flex',gap:'8px',padding:'10px 0 12px',animation:'fadeUpApp .2s ease'});
+        acts.appendChild(e('button','bp bsm',{},['📞 Voice'],{click:()=>goCall(c)}));
+        acts.appendChild(e('button','bs bsm',{},['📹 Video'],{click:()=>goCall({...c,video:true})}));
+        acts.appendChild(e('button','bs bsm',{},['💬 Chat'],{click:()=>goChat(c)}));
+        row.appendChild(acts);
+      }
+      listDiv.appendChild(row);
+    });
+  }
+  upd();return wrap;
+}
+
+function recentScr(onlyMissed){
+  const wrap=e('div','scr');
+  wrap.appendChild(e('div',null,{padding:'14px 16px 8px',flexShrink:'0',fontSize:'24px',fontWeight:'700',color:'#e8f4f0'},[onlyMissed?'Missed Calls':'Recent Calls']));
+  const sc=e('div','scroll');
+  const grp={};
+  RECENTS.filter(r=>onlyMissed?r.type==='missed':true).forEach(r=>{
+    const c=CONTACTS.find(x=>x.id===r.cid);if(!c)return;
+    if(!grp[r.date])grp[r.date]=[];grp[r.date].push({...r,c});
+  });
+  if(!Object.keys(grp).length){
+    const em=e('div',null,{textAlign:'center',padding:'60px 0',color:'#5a7a8a'});
+    em.appendChild(e('div',null,{fontSize:'36px',marginBottom:'8px'},[onlyMissed?'📵':'📞']));
+    em.appendChild(e('div',null,{fontSize:'13px'},[`No ${onlyMissed?'missed':'recent'} calls`]));
+    sc.appendChild(em);
+  }
+  Object.entries(grp).forEach(([date,rows])=>{
+    sc.appendChild(e('div',null,{padding:'8px 16px 4px',fontSize:'10px',color:'#5a7a8a',letterSpacing:'.1em'},[date]));
+    rows.forEach(r=>{
+      const row=e('div',null,{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 16px',borderBottom:'1px solid #0f1a23'});
+      const lft=e('div',null,{display:'flex',alignItems:'center',gap:'10px',flex:'1',cursor:'pointer'},{},{click:()=>goCall(r.c)});
+      lft.appendChild(av(r.c.init,r.c.color,44));
+      const inf=e('div');
+      inf.appendChild(e('div',null,{fontSize:'14px',color:'#e8f4f0'},[r.c.name]));
+      inf.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a',marginBottom:'4px'},[`${r.c.country.flag} ${r.c.country.code} ${r.c.phone}`]));
+      inf.appendChild(pillEl(r.type));lft.appendChild(inf);row.appendChild(lft);
+      const rgt=e('div',null,{textAlign:'right',flexShrink:'0',marginLeft:'8px'});
+      rgt.appendChild(e('div',null,{fontSize:'12px',color:r.type==='missed'?'#ff5555':'#5a7a8a'},[r.time]));
+      if(r.dur)rgt.appendChild(e('div',null,{fontSize:'10px',color:'#5a7a8a'},[r.dur]));
+      rgt.appendChild(e('button',null,{marginTop:'6px',width:'32px',height:'32px',borderRadius:'8px',background:'#0d3325',border:'1px solid #1a5a40',color:'#00e5a0',fontSize:'15px',display:'flex',alignItems:'center',justifyContent:'center'},['📞'],{click:()=>goCall(r.c)}));
+      row.appendChild(rgt);sc.appendChild(row);
+    });
+  });
+  wrap.appendChild(sc);return wrap;
+}
+
+function callScr(){
+  const c=S.callC;
+  const wrap=e('div','scr',{background:'#08111a'});
+  const hdr=e('div',null,{background:'#0d1820',padding:'12px 16px 10px',flexShrink:'0'});
+  const top=e('div',null,{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px'});
+  const lft=e('div',null,{display:'flex',alignItems:'center',gap:'10px'});
+  const avW=e('div',null,{position:'relative'});
+  avW.appendChild(av(c.init||'#',c.color,50));
+  avW.appendChild(e('div',null,{position:'absolute',bottom:'2px',right:'2px',width:'10px',height:'10px',borderRadius:'50%',background:'#00e5a0',border:'2px solid #0d1820',animation:'glowApp 1.5s infinite'}));
+  lft.appendChild(avW);
+  const ci=e('div');
+  ci.appendChild(e('div',null,{fontSize:'15px',fontWeight:'600',color:'#e8f4f0'},[c.name]));
+  ci.appendChild(e('div',null,{fontSize:'11px',color:'#00e5a0'},['● Translating Live']));
+  ci.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a'},[`${c.country.flag} ${c.country.lc}`]));
+  lft.appendChild(ci);top.appendChild(lft);
+  const te=e('div',null,{textAlign:'right'});
+  const tt=e('div',null,{fontSize:'22px',fontWeight:'700',color:'#e8f4f0',fontVariantNumeric:'tabular-nums'},[fmt2(S.callSecs)]);
+  te.appendChild(tt);if(S.callHold)te.appendChild(e('div',null,{fontSize:'10px',color:'#ffb74d'},['⏸ On Hold']));
+  top.appendChild(te);hdr.appendChild(top);
+  const lb=e('div',null,{background:'#111920',border:'1px solid #1e2d3d',borderRadius:'10px',padding:'7px 14px',display:'flex',alignItems:'center',justifyContent:'space-between'});
+  lb.appendChild(e('span',null,{fontSize:'13px',color:'#e8f4f0'},[`🇮🇳 TE ⇄ ${c.country.flag} ${c.country.lc}`]));
+  lb.appendChild(e('span',null,{background:'#00e5a0',color:'#0a0f14',borderRadius:'6px',padding:'2px 9px',fontSize:'11px',fontWeight:'700'},['LIVE']));
+  hdr.appendChild(lb);
+  hdr.appendChild(e('div',null,{background:'#1a1200',border:'1px solid #3a2800',borderRadius:'8px',padding:'5px 10px',marginTop:'8px',fontSize:'10px',color:'#c8a040',lineHeight:'1.5'},['⚠️ AI translation may contain errors. Not for emergency use.']));
+  wrap.appendChild(hdr);
+  const tabs=e('div',null,{display:'flex',borderBottom:'1px solid #1e2d3d',flexShrink:'0'});
+  ['live','transcript'].forEach(tb=>{
+    const on=S.callTab===tb;
+    tabs.appendChild(e('button',null,{flex:'1',padding:'9px',background:'none',borderBottom:on?'2px solid #00e5a0':'2px solid transparent',color:on?'#00e5a0':'#5a7a8a',fontSize:'13px'},[tb==='live'?'🎙 Live':'📋 Transcript'],{click:()=>{S.callTab=tb;render();}}));
+  });
+  wrap.appendChild(tabs);
+  const msgs=e('div',null,{flex:'1',overflowY:'auto',padding:'10px 14px',display:'flex',flexDirection:'column',gap:'10px'});
+  S.callMsgs.forEach(m=>{
+    const me=m.side==='me';
+    const box=e('div',null,{display:'flex',flexDirection:'column',alignItems:me?'flex-end':'flex-start',gap:'4px',animation:'fadeUpApp .3s ease'});
+    box.appendChild(e('div',null,{fontSize:'9px',color:'#5a7a8a'},[me?'Me (TE)':`${c.country.flag} ${c.country.lc}`]));
+    const ob=e('div',null,{background:me?'#1a2a4a':'#1a2330',border:`1px solid ${me?'#2a3a6a':'#1e2d3d'}`,borderRadius:'12px',padding:'8px 12px',maxWidth:'80%'});
+    ob.appendChild(e('div',null,{fontSize:'9px',color:'#5a7a8a',marginBottom:'3px'},[me?'🇮🇳':c.country.flag,' Original']));
+    ob.appendChild(e('div',null,{fontSize:'13px',color:'#e8f4f0'},[m.orig]));box.appendChild(ob);
+    const xb=e('div',null,{background:me?'#0a2a1e':'#0a2215',border:'1px solid #1a5a40',borderRadius:'12px',padding:'8px 12px',maxWidth:'80%'});
+    xb.appendChild(e('div',null,{fontSize:'9px',color:'#00e5a0',marginBottom:'3px'},[me?c.country.flag:'🇮🇳',' Translated']));
+    xb.appendChild(e('div',null,{fontSize:'13px',color:'#00e5a0'},[m.xlat]));box.appendChild(xb);
+    msgs.appendChild(box);
+  });
+  setTimeout(()=>msgs.scrollTop=msgs.scrollHeight,0);wrap.appendChild(msgs);
+  const ctrl=e('div',null,{background:'#0d1820',padding:'10px 14px 8px',flexShrink:'0'});
+  function ctrlB(icon,label,on,cb){
+    const btn=e('button','cb',{border:`1px solid ${on?'#1a5a40':'#1e2d3d'}`,background:on?'#0d3325':'#111920',color:on?'#00e5a0':'#5a7a8a'},{},{click:cb});
+    btn.appendChild(e('span','ci',{},[icon]));btn.appendChild(e('span',null,{},[label]));return btn;
+  }
+  const g1=e('div','cgrid',{gap:'8px',marginBottom:'8px'});
+  g1.appendChild(ctrlB(S.callMuted?'🎤':'🔇',S.callMuted?'Unmute':'Mute',S.callMuted,()=>{S.callMuted=!S.callMuted;render();}));
+  g1.appendChild(ctrlB('🔊',S.callSpeaker?'Loud':'Speaker',S.callSpeaker,()=>{S.callSpeaker=!S.callSpeaker;render();}));
+  g1.appendChild(ctrlB('翻',S.callTransOn?'Trans ON':'OFF',S.callTransOn,()=>{S.callTransOn=!S.callTransOn;render();}));
+  ctrl.appendChild(g1);
+  const g2=e('div','cgrid',{gap:'8px',marginBottom:'10px'});
+  g2.appendChild(ctrlB('⏸',S.callHold?'Resume':'Hold',S.callHold,()=>{S.callHold=!S.callHold;render();}));
+  g2.appendChild(ctrlB('📹','Video',false,()=>{}));
+  g2.appendChild(ctrlB('➕','Add',false,()=>{}));
+  ctrl.appendChild(g2);
+  const row=e('div',null,{display:'flex',gap:'10px',alignItems:'center'});
+  let listening=false,recog=null;
+  const spkBtn=e('button',null,{flex:'1',padding:'13px',borderRadius:'14px',border:'1px solid #1a5a40',background:'#0d3325',color:'#00e5a0',fontWeight:'600',fontSize:'13px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',opacity:(S.callTransOn&&!S.callMuted&&!S.callHold)?'1':'0.4'},['🎙 Hold to Speak']);
+  const startSp=async()=>{
+    if(!S.callTransOn||S.callMuted||S.callHold||listening)return;
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+    try{await navigator.mediaDevices.getUserMedia({audio:true});}catch(err){}
+    recog=new SR();recog.lang='en-US';recog.interimResults=false;
+    recog.onstart=()=>{listening=true;spkBtn.innerHTML='<div style="width:9px;height:9px;border-radius:50%;background:#0a0f14;animation:pulseApp .8s infinite;display:inline-block"></div>&nbsp;Speaking…';spkBtn.style.background='#00e5a0';spkBtn.style.color='#0a0f14';};
+    recog.onresult=async ev=>{
+      const text=ev.results[0][0].transcript;listening=false;
+      spkBtn.innerHTML='<div style="width:14px;height:14px;border:2px solid #0d3325;border-top:2px solid #00e5a0;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></div>&nbsp;Translating…';
+      spkBtn.style.background='#0d3325';spkBtn.style.color='#00e5a0';
+      try{
+        const xlat=await aiXlat(text,c.country.lang);
+        S.callMsgs.push({id:Date.now(),side:'me',orig:`"${text}"`,xlat:`"${xlat}"`});
+        const u=new SpeechSynthesisUtterance(xlat);u.lang=c.country.sc;
+        window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
+      }catch(err){}render();
+    };
+    recog.onend=()=>{listening=false;spkBtn.textContent='🎙 Hold to Speak';spkBtn.style.background='#0d3325';spkBtn.style.color='#00e5a0';};
+    recog.onerror=()=>{listening=false;};
+    recog.start();
+  };
+  const stopSp=()=>recog?.stop();
+  spkBtn.addEventListener('mousedown',startSp);spkBtn.addEventListener('mouseup',stopSp);
+  spkBtn.addEventListener('touchstart',ev=>{ev.preventDefault();startSp();},{passive:false});
+  spkBtn.addEventListener('touchend',ev=>{ev.preventDefault();stopSp();},{passive:false});
+  row.appendChild(spkBtn);
+  row.appendChild(e('button',null,{width:'54px',height:'54px',borderRadius:'50%',background:'#cc2222',fontSize:'22px',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px #cc222255'},['📵'],{click:endCall}));
+  ctrl.appendChild(row);wrap.appendChild(ctrl);return wrap;
+}
+
+function chatScr(){
+  const c=S.chatC;
+  const wrap=e('div','scr',{background:'#0a0f14'});
+  const hdr=e('div',null,{background:'#111920',borderBottom:'1px solid #1e2d3d',padding:'10px 14px',display:'flex',alignItems:'center',gap:'12px',flexShrink:'0'});
+  hdr.appendChild(e('button',null,{background:'none',color:'#00e5a0',fontSize:'20px',padding:'0 4px'},['←'],{click:()=>{S.chatC=null;render();}}));
+  hdr.appendChild(av(c.init||'?',c.color,40));
+  const hi=e('div',null,{flex:'1'});
+  hi.appendChild(e('div',null,{fontSize:'15px',fontWeight:'600',color:'#e8f4f0'},[c.name]));
+  hi.appendChild(e('div',null,{fontSize:'11px',color:'#00e5a0'},['🌐 AI Chat · ',c.country.flag,' ',c.country.lang]));
+  hdr.appendChild(hi);
+  hdr.appendChild(e('button',null,{background:'#0d3325',border:'1px solid #1a5a40',borderRadius:'20px',padding:'5px 12px',color:'#00e5a0',fontSize:'11px'},['📞 Call'],{click:()=>goCall(c)}));
+  wrap.appendChild(hdr);
+  wrap.appendChild(e('div','wbar',['⚠️ AI translations may contain errors. Not for legal, medical or emergency use.']));
+  const ma=e('div',null,{flex:'1',overflowY:'auto',padding:'12px 14px',display:'flex',flexDirection:'column',gap:'12px'});
+  function renderMsgs(){
+    ma.innerHTML='';
+    S.chatMsgs.forEach(m=>{
+      const me=m.side==='me';
+      const box=e('div',null,{display:'flex',flexDirection:'column',alignItems:me?'flex-end':'flex-start',animation:'fadeUpApp .25s ease'});
+      const ob=e('div',null,{background:me?'#1e3a6a':'#16222d',border:`1px solid ${me?'#2a4a8a':'#1e2d3d'}`,borderRadius:me?'16px 16px 4px 16px':'16px 16px 16px 4px',padding:'10px 14px',maxWidth:'78%'});
+      ob.appendChild(e('div',null,{fontSize:'14px',color:'#e8f4f0',lineHeight:'1.5'},[m.text]));
+      ob.appendChild(e('div',null,{fontSize:'9px',color:'#5a7a8a',marginTop:'3px',textAlign:'right'},[m.ts]));
+      box.appendChild(ob);
+      const xb=e('div',null,{background:me?'#0a2215':'#0a1e30',border:'1px solid #1a5a40',borderRadius:me?'4px 16px 16px 16px':'16px 4px 16px 16px',padding:'7px 12px',maxWidth:'78%',marginTop:'3px',display:'flex',alignItems:'flex-start',gap:'6px'});
+      xb.appendChild(e('span',null,{fontSize:'10px',flexShrink:'0',marginTop:'1px'},[me?c.country.flag:'🇮🇳']));
+      xb.appendChild(e('div',null,{fontSize:'12px',color:'#00e5a0',lineHeight:'1.5',fontStyle:m.xlat==='Translating…'?'italic':'normal',opacity:m.xlat==='Translating…'?'0.6':'1'},[m.xlat]));
+      box.appendChild(xb);ma.appendChild(box);
+    });
+    setTimeout(()=>ma.scrollTop=ma.scrollHeight,0);
+  }
+  renderMsgs();wrap.appendChild(ma);
+  const ib=e('div',null,{background:'#111920',borderTop:'1px solid #1e2d3d',padding:'10px 14px',display:'flex',gap:'10px',alignItems:'flex-end',flexShrink:'0'});
+  const iw=e('div',null,{flex:'1',background:'#16222d',border:'1px solid #1e2d3d',borderRadius:'20px',padding:'10px 16px',display:'flex',alignItems:'center'});
+  const ta=document.createElement('textarea');
+  ta.placeholder=`Type in English… translates to ${c.country.lang}`;ta.rows=1;
+  Object.assign(ta.style,{flex:'1',background:'none',border:'none',color:'#e8f4f0',fontSize:'13px',resize:'none',lineHeight:'1.5',maxHeight:'80px',overflow:'auto'});
+  iw.appendChild(ta);ib.appendChild(iw);
+  let sending=false;
+  const sb2=e('button',null,{width:'44px',height:'44px',borderRadius:'50%',background:'#16222d',color:'#5a7a8a',fontSize:'18px',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:'0',transition:'all .2s'},['➤']);
+  const doSend=async()=>{
+    const text=ta.value.trim();if(!text||sending)return;
+    ta.value='';sending=true;sb2.textContent='⏳';
+    const tmpId=Date.now();const ts=nowTs();
+    S.chatMsgs.push({id:tmpId,side:'me',text,xlat:'Translating…',ts});renderMsgs();
+    try{
+      const xlat=await aiXlat(text,c.country.lang);
+      const idx=S.chatMsgs.findIndex(x=>x.id===tmpId);
+      if(idx>=0)S.chatMsgs[idx].xlat=xlat;
+    }catch(err){
+      const idx=S.chatMsgs.findIndex(x=>x.id===tmpId);
+      if(idx>=0)S.chatMsgs[idx].xlat='Translation failed';
+    }
+    sending=false;sb2.textContent='➤';renderMsgs();
+  };
+  sb2.addEventListener('click',doSend);
+  ta.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&!ev.shiftKey){ev.preventDefault();doSend();}});
+  ta.addEventListener('input',()=>{sb2.style.background=ta.value.trim()?'#00e5a0':'#16222d';sb2.style.color=ta.value.trim()?'#0a0f14':'#5a7a8a';});
+  ib.appendChild(sb2);wrap.appendChild(ib);return wrap;
+}
+
+function settingsScr(){
+  const wrap=e('div','scr');
+  wrap.appendChild(e('div',null,{padding:'14px 16px 6px',flexShrink:'0',fontSize:'24px',fontWeight:'700',color:'#e8f4f0'},['Settings']));
+  const sc=e('div','scroll');
+  const prof=e('div',null,{margin:'0 16px 4px',padding:'14px',background:'#111920',border:'1px solid #1e2d3d',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'space-between'});
+  const pl=e('div',null,{display:'flex',alignItems:'center',gap:'12px'});pl.appendChild(av('DK','#00e5a0',52));
+  const pi=e('div');
+  pi.appendChild(e('div',null,{fontSize:'16px',fontWeight:'600',color:'#e8f4f0'},[S.user?.name||'User']));
+  pi.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a'},[S.user?.email||'user@gmail.com']));
+  pi.appendChild(e('div',null,{fontSize:'11px',color:'#00e5a0'},['✓ Gmail Verified']));
+  pl.appendChild(pi);prof.appendChild(pl);
+  prof.appendChild(e('div',null,{background:'#16222d',border:'1px solid #1e2d3d',borderRadius:'8px',padding:'4px 10px',fontSize:'12px',color:'#00e5a0',fontWeight:'700'},['FREE']));
+  sc.appendChild(prof);
+  function sec(icon,title){sc.appendChild(e('div',null,{padding:'12px 16px 4px',fontSize:'11px',color:'#5a7a8a',letterSpacing:'.1em'},[`${icon} ${title}`]));}
+  function row(icon,title,sub,right){
+    const r=e('div',null,{margin:'0 16px',padding:'12px 0',borderBottom:'1px solid #0f1a23',display:'flex',alignItems:'center',gap:'12px'});
+    const ic=e('div',null,{width:'38px',height:'38px',borderRadius:'10px',background:'#16222d',border:'1px solid #1e2d3d',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'18px',flexShrink:'0'});
+    ic.textContent=icon;r.appendChild(ic);
+    const inf=e('div',null,{flex:'1'});inf.appendChild(e('div',null,{fontSize:'14px',color:'#e8f4f0'},[title]));
+    if(sub)inf.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a'},[sub]));
+    r.appendChild(inf);r.appendChild(right);sc.appendChild(r);
+  }
+  sec('🌐','LANGUAGE SETTINGS');
+  row('🌍','My Language','🇮🇳 Telugu (TE)',e('button','bs bsm',{},['Change'],{click:()=>{}}));
+  row('🔤','Auto Language Detect',"Automatically detect caller's language",togEl(S.settings.autoDetect,()=>{S.settings.autoDetect=!S.settings.autoDetect;render();}));
+  row('🕐','Translation Mode','Real-time (fastest)',e('span',null,{background:'#16222d',border:'1px solid #1e2d3d',borderRadius:'8px',padding:'4px 10px',fontSize:'12px',color:'#e8f4f0'},['Real-time ▾']));
+  sec('🔒','SECURITY');
+  row('🛡','Encrypted in Transit','Calls use HTTPS/TLS encryption',togEl(S.settings.e2e,()=>{S.settings.e2e=!S.settings.e2e;render();}));
+  row('🔐','Secure Login','Gmail authentication enabled',e('span',null,{color:'#00e5a0',fontSize:'12px'},['✓ ON']));
+  row('👤','Data Privacy','Call audio is not stored or sold',e('span',null,{color:'#00e5a0',fontSize:'12px'},['Protected ✓']));
+  sec('🔔','NOTIFICATIONS');
+  row('🔔','Call Notifications','Get notified for incoming calls',togEl(S.settings.notifs,()=>{S.settings.notifs=!S.settings.notifs;render();}));
+  row('🌙','Dark Mode','Always on dark theme',togEl(S.settings.dark,()=>{S.settings.dark=!S.settings.dark;render();}));
+  sec('💎','SUBSCRIPTION');
+  const sub=e('div',null,{margin:'4px 16px 4px',borderRadius:'14px',padding:'14px 16px',background:'linear-gradient(135deg,#0d3325,#1a4a30)',border:'1px solid #1a5a40'});
+  sub.appendChild(e('div',null,{fontSize:'17px',fontWeight:'700',color:'#e8f4f0',marginBottom:'4px'},['D Lingo Free']));
+  sub.appendChild(e('div',null,{fontSize:'11px',color:'#5a7a8a',marginBottom:'12px'},['5 translated calls/month · 10 languages']));
+  ['5 translated calls/month','10 supported languages','Basic voice translation'].forEach(f=>{
+    const d=e('div',null,{display:'flex',gap:'8px',marginBottom:'7px'});
+    d.appendChild(e('span',null,{color:'#00e5a0'},['✓']));
+    d.appendChild(e('span',null,{fontSize:'13px',color:'#e8f4f0'},[f]));sub.appendChild(d);
+  });
+  sub.appendChild(e('p',null,{fontSize:'9px',color:'#5a7a8a',marginBottom:'8px',lineHeight:'1.6'},['* Translation accuracy not guaranteed. Not for medical, legal or emergency use.']));
+  sub.appendChild(e('button',null,{width:'100%',marginTop:'4px',padding:'13px',borderRadius:'12px',background:'linear-gradient(135deg,#00e5a0,#4a7cf0)',border:'none',fontWeight:'700',fontSize:'15px',color:'#fff'},['Upgrade to Premium ✨'],{click:()=>alert('Premium plans coming soon!')}));
+  sc.appendChild(sub);
+  sec('📋','LEGAL');
+  row('📄','Terms of Service','Read our terms of use',e('button','bs bsm',{},['View'],{click:()=>{S.legalModal='terms';render();}}));
+  row('🔏','Privacy Policy','How we handle your data',e('button','bs bsm',{},['View'],{click:()=>{S.legalModal='privacy';render();}}));
+  row('⚠️','AI Disclaimer','Translation accuracy & limitations',e('button','bs bsm',{},['View'],{click:()=>{S.legalModal='ai';render();}}));
+  sec('⚠','ACCOUNT');
+  row('🗑','Clear Call History','Remove all recent calls',e('button','bd',{},['Clear'],{click:()=>alert('History cleared!')}));
+  row('🚪','Log Out','Sign out of D Lingo',e('button','bd',{},['Logout'],{click:()=>{S.screen='login';render();}}));
+  const ft=e('div',null,{padding:'14px 16px 28px'});
+  ft.appendChild(e('button',null,{width:'100%',padding:'14px',borderRadius:'14px',background:'#00e5a0',border:'none',color:'#0a0f14',fontWeight:'700',fontSize:'15px'},['Save Settings'],{click:()=>alert('Settings saved!')}));
+  const dots=e('div',null,{display:'flex',justifyContent:'center',gap:'6px',marginTop:'14px'});
+  for(let i=0;i<5;i++)dots.appendChild(e('div',null,{width:'28px',height:'4px',borderRadius:'2px',background:'#00e5a0',opacity:'.7'}));
+  ft.appendChild(dots);
+  ft.appendChild(e('div',null,{textAlign:'center',marginTop:'8px',fontSize:'12px',color:'#00e5a0'},['🎉 All 5 Steps Complete!']));
+  sc.appendChild(ft);wrap.appendChild(sc);return wrap;
+}
+
+/* ══ ACTIONS ══ */
+function goCall(c){
+  if(S.callTimer)clearInterval(S.callTimer);
+  S.callC=c;S.chatC=null;S.callSecs=0;S.callMuted=false;S.callSpeaker=false;S.callTransOn=true;S.callHold=false;S.callTab='live';
+  S.callMsgs=[
+    {id:1,side:'them',orig:'"నమస్కారం! మీరు ఎలా ఉన్నారు?"',xlat:'"Hello! How are you?"'},
+    {id:2,side:'me',orig:'"Hello! I am doing great, thanks!"',xlat:'"నేను బాగున్నాను, ధన్యవాదాలు!"'},
+    {id:3,side:'them',orig:'"మీ ప్రాజెక్ట్ ఎలా వెళ్తోంది?"',xlat:'"How is your project going?"'}
+  ];
+  S.callTimer=setInterval(()=>{S.callSecs++;},1000);
+  render();
+}
+function endCall(){if(S.callTimer)clearInterval(S.callTimer);S.callC=null;render();}
+function goChat(c){
+  S.chatC=c;S.callC=null;
+  S.chatMsgs=[
+    {id:1,side:'them',text:'నమస్కారం! ఎలా ఉన్నారు?',xlat:'Hello! How are you?',ts:'9:41 AM'},
+    {id:2,side:'me',text:'I am doing great, thanks!',xlat:'నేను బాగున్నాను, ధన్యవాదాలు!',ts:'9:42 AM'},
+    {id:3,side:'them',text:'మీ project ఎలా వెళ్తోంది?',xlat:'How is your project going?',ts:'9:43 AM'}
+  ];
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
